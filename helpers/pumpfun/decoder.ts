@@ -14,7 +14,7 @@ import {
     TransactionInstructionType,
     TransactionInstructionUpdatedAccountBalanceEvent,
 } from './';
-import { PUMPFUN_SWAP_DATA_STRUCT } from './struct';
+import { PUMPFUN_CREATE_DATA_STRUCT, PUMPFUN_SWAP_DATA_STRUCT } from './struct';
 
 const {
     PUMP_PROGRAM,
@@ -24,12 +24,31 @@ const {
 
 const test = process.argv.includes("test")
 
-function decodePump(data: string) {
+function decodePumpCreate(data: string) {
     try {
-        const bufferBS58 = bs58.decode(data)
+        const bufferBS58 = Buffer.from(bs58.decode(data))
+        const decoded = PUMPFUN_CREATE_DATA_STRUCT.decode(bufferBS58)
+
+        const newStruct = {
+            name: decoded.name,
+            symbol: decoded.symbol,
+            uri: decoded.uri,
+            creator: decoded.creator.toString(),
+        }
+
+        return newStruct
+    } catch (err) {
+        return null
+    }
+}
+
+function decodePumpSwap(data: string) {
+    try {
+        const bufferBS58 = Buffer.from(bs58.decode(data))
         const decoded = PUMPFUN_SWAP_DATA_STRUCT.decode(bufferBS58)
 
         const newStruct = {
+            mint: decoded.mint.toString(),
             sol_amount: r(decoded.sol_amount) / 10 ** 9,
             token_amount: r(decoded.token_amount) / 10 ** 6,
             is_buy: decoded.is_buy,
@@ -41,6 +60,7 @@ function decodePump(data: string) {
 
         return newStruct
     } catch (err) {
+        console.error("Error decoding pump swap data", err)
         return null
     }
 }
@@ -78,9 +98,19 @@ export function decodeTransactionInfo(tx: Transaction, timestamp: number) {
 
         const innerInstructions = innerInstructionsMapped.get(i)
 
+        if (!innerInstructions) {
+            // No inner instructions, skip
+            return;
+        }
+
         if (instruction.programId == PUMP_PROGRAM && instruction?.accounts?.includes(PUMP_MINT!)) {
+            // Create new token
             creationIndex = true
+
+            const decoded = decodePumpCreate(instruction.data)
+            if (!decoded) return;
             decodedTransactions.push({
+                ...decoded,
                 type: TransactionInstructionType.CREATED,
                 hash: tx.transaction.signatures[0],
                 accounts: getAccountsForCreateInstructions(instruction.accounts),
@@ -89,10 +119,11 @@ export function decodeTransactionInfo(tx: Transaction, timestamp: number) {
             })
         }
 
-        if (innerInstructions && !creationIndex) {
+        if (!creationIndex) {
             innerInstructions.forEach(async (innerInstruction: any, x) => {
                 if (innerInstruction.programId == PUMP_PROGRAM) {
-                    const decoded = decodePump(innerInstruction.data)
+                    // Buy/Sell token
+                    const decoded = decodePumpSwap(innerInstruction.data)
 
                     if (!decoded) return;
 

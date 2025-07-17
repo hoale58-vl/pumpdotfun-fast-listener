@@ -7,7 +7,6 @@
     "debug": "tsc && tsx ./main.ts dev log",
     "start": "node ./dist/main.js",
     "db": "node ./dist/db/index.js",
-    "fetch": "tsx ./helpers/writetx.ts",
     "decode": "tsx ./helpers/pumpfun/decoder.ts test save log",
     "build": "tsc"
   },
@@ -15,6 +14,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@coral-xyz/borsh": "^0.31.1",
     "@solana/buffer-layout": "^4.0.1",
     "@solana/buffer-layout-utils": "^0.2.0",
     "axios": "^1.7.2",
@@ -26,5 +26,6 @@
   "devDependencies": {
     "tsx": "^4.16.2",
     "typescript": "^5.5.4"
-  }
+  },
+  "packageManager": "yarn@4.9.1+sha512.f95ce356460e05be48d66401c1ae64ef84d163dd689964962c6888a9810865e39097a5e9de748876c2e0bf89b232d583c33982773e9903ae7a76257270986538"
 }

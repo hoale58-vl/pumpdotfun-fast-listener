@@ -1,11 +1,7 @@
-import { struct } from '@solana/buffer-layout';
-import {
-  bool,
-  publicKey,
-  u64,
-} from '@solana/buffer-layout-utils';
+import * as borsh from "@coral-xyz/borsh";
 
 interface PumpFunSwapDataStruct {
+    mint: any,
     sol_amount: BigInt,
     token_amount: BigInt,
     is_buy: boolean,
@@ -15,44 +11,32 @@ interface PumpFunSwapDataStruct {
     virtual_token_reserves: BigInt,
 }
 
-export const PUMPFUN_SWAP_DATA_STRUCT = struct<PumpFunSwapDataStruct>([
-    u64("_"),
-    u64("_"),
-    u64("_"),
-    u64("_"),
-    u64("_"),
-    u64("_"),
-    u64("sol_amount"),
-    u64("token_amount"),
-    bool("is_buy"),
-    publicKey("user_publickey"),
-    u64("timestamp"),
-    u64("virtual_sol_reserves"),
-    u64("virtual_token_reserves"),
+// Pump.fun: anchor Self CPI Log / TradeEvent
+export const PUMPFUN_SWAP_DATA_STRUCT = borsh.struct<PumpFunSwapDataStruct>([
+    borsh.u64("_"),
+    borsh.u64("_"), // discriminator
+    borsh.publicKey("mint"),
+    borsh.u64("sol_amount"),
+    borsh.u64("token_amount"),
+    borsh.bool("is_buy"),
+    borsh.publicKey("user_publickey"),
+    borsh.i64("timestamp"),
+    borsh.u64("virtual_sol_reserves"),
+    borsh.u64("virtual_token_reserves"),
 ]);
 
 interface PumpFunCreateDataStruct {
-    sol_amount: BigInt,
-    token_amount: BigInt,
-    is_buy: boolean,
-    user_publickey: any,
-    timestamp: BigInt,
-    virtual_sol_reserves: BigInt,
-    virtual_token_reserves: BigInt,
+    name: string,
+    symbol: string,
+    uri: string,
+    creator: any,
 }
 
-export const PUMPFUN_CREATE_DATA_STRUCT = struct<PumpFunCreateDataStruct>([
-    u64("_"),
-    u64("_"),
-    u64("_"),
-    u64("_"),
-    u64("_"),
-    u64("_"),
-    u64("sol_amount"),
-    u64("token_amount"),
-    bool("is_buy"),
-    publicKey("user_publickey"),
-    u64("timestamp"),
-    u64("virtual_sol_reserves"),
-    u64("virtual_token_reserves"),
+// Pump.fun: anchor Self CPI Log / CreateEvent
+export const PUMPFUN_CREATE_DATA_STRUCT = borsh.struct<PumpFunCreateDataStruct>([
+    borsh.u64("_"), // discriminator
+    borsh.str("name"),
+    borsh.str("symbol"),
+    borsh.str("uri"),
+    borsh.publicKey("creator"),
 ]);

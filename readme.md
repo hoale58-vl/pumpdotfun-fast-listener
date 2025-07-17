@@ -52,7 +52,6 @@ Those are the scripts under the hood
     "debug": "tsc && tsx ./main.ts dev log",
     "start": "tsc && node ./dist/main.js",
     "db": "tsc && node ./dist/db/index.js",
-    "fetch": "tsx ./helpers/writetx.ts",
     "decode": "tsx ./helpers/pumpfun/decoder.ts test save log"
 }
 ```
